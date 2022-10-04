@@ -1,6 +1,4 @@
-./app/vendor
-./app/.env*
-./app/.env.example
+/app/.env*
+/app/vendor/
 
-./app/vendor/*
 .idea
