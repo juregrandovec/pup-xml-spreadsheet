@@ -13,4 +13,4 @@ services:
     restart: unless-stopped
     working_dir: /var/www/
     volumes:
-      - ./app:/var/www
+      - ./application:/var/www

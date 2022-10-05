@@ -1,0 +1,35 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+use Symfony\Component;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\Dotenv\Dotenv;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+class App extends Component\Console\Application
+{
+    public function __construct(iterable $commands)
+    {
+        $commands = $commands instanceof Traversable ? iterator_to_array($commands) : $commands;
+
+        foreach ($commands as $command) {
+            $this->add($command);
+        }
+
+        parent::__construct();
+    }
+}
+
+$container = new ContainerBuilder();
+$loader = new YamlFileLoader($container, new Component\Config\FileLocator(__DIR__ . '/../config'));
+$dotenv = new Dotenv();
+
+
+$dotenv->loadEnv(__DIR__ . '/../.env');
+$loader->load('services.yaml');
+$container->compile(true);
+
+$app = $container->get(App::class);
+$app->run();
