@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Services;
 
 use Exception;
 
@@ -18,6 +18,7 @@ class FtpService
     public function getFileFromFtp(string $localFileName, string $serverFileName): string
     {
         $ftpConnection = ftp_connect($this->ftpDomain);
+
         if ($ftpConnection) {
             $login_result = ftp_login($ftpConnection, $this->ftpUsername, $this->ftpPassword);
             ftp_pasv($ftpConnection, true);
@@ -29,7 +30,6 @@ class FtpService
                     ftp_close($ftpConnection);
                     throw new Exception("FTP GET failed!");
                 }
-
             } else {
                 ftp_close($ftpConnection);
                 throw new Exception("FTP login failed!");

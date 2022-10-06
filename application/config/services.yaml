@@ -16,10 +16,14 @@ services:
     arguments:
       - !tagged_iterator app.command
 
-  App\Service\FtpService:
+  App\Services\FtpService:
     autowire: true
     arguments:
       $ftpDomain: "%env(XML_FPT_DOMAIN)%"
       $ftpUsername: '%env(string:XML_FTP_USERNAME)%'
       $ftpPassword: '%env(string:XML_FTP_PASSWORD)%'
 
+  App\Services\GoogleSpreadSheetApiClientService:
+    autowire: true
+    arguments:
+      $googleCredentialsFilePath: "%env(GOOGLE_CREDENTIALS_PATH)%"

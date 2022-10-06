@@ -8,8 +8,7 @@ services:
         uid: 1
       context: ./
       dockerfile: Dockerfile
-    image: web
-    container_name: web
+    container_name: pup-xml-app
     restart: unless-stopped
     working_dir: /var/www/
     volumes:

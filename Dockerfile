@@ -5,7 +5,7 @@ ARG user
 ARG uid
 
 # Install PHP extensions
-#RUN docker-php-ext-install pdo_mysql
+#RUN docker-php-ext-install simplexml
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -16,6 +16,7 @@ RUN mkdir -p /home/$user/.composer && \
     chown -R $user:$user /home/$user
 RUN apt-get -y update
 RUN apt-get -y install git
+#RUN apt-get -y install libxml2-dev
 
 # Set working directory
 WORKDIR /var/www
