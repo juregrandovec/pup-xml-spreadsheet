@@ -1,6 +1,7 @@
 /application/.env
 /application/vendor/
 /application/storage/tmp
+/application/storage/logs
 /application/credentials.json
 
 .idea

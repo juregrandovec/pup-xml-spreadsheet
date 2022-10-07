@@ -26,7 +26,6 @@ $container = new ContainerBuilder();
 $loader = new YamlFileLoader($container, new Component\Config\FileLocator(__DIR__ . '/../config'));
 $dotenv = new Dotenv();
 
-
 $dotenv->loadEnv(__DIR__ . '/../.env');
 $loader->load('services.yaml');
 $container->compile(true);

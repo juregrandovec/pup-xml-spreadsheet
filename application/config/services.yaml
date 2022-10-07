@@ -1,7 +1,9 @@
 # config/services.yaml
 services:
   _defaults:
+    autoconfigure: true
     autowire: true
+    public: true
 
   _instanceof:
     Symfony\Component\Console\Command\Command:

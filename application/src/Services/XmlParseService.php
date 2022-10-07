@@ -2,30 +2,40 @@
 
 namespace App\Services;
 
+use Exception;
+
 class XmlParseService
 {
-
     /**
      * @param string $fileName
      * @param $xmlParentElementName
-     * @return array
+     * @return array|null
+     * @throws Exception
      */
-    public function getParsedDataFromXmlFile(string $fileName, $xmlParentElementName): array
+    public function getParsedDataFromXmlFile(string $fileName, $xmlParentElementName): ?array
     {
         $xml = simplexml_load_file($fileName, options: LIBXML_NOCDATA);
+        if (!$xml) {
+            throw new Exception("Error while reading data from XML file");
+        }
+
         $xmlItems = json_decode(json_encode($xml), true);
+
+        if (!isset($xmlItems[$xmlParentElementName])) {
+            throw new Exception("XML element not found");
+        }
 
         return $this->parseXmlItemsIntoArray($xmlItems[$xmlParentElementName]);
     }
 
     /**
-     * @param $xmlItems
+     * @param array
      * @return array
      */
-    public function parseXmlItemsIntoArray($xmlItems): array
+    private function parseXmlItemsIntoArray(array $xmlItems): array
     {
-        $columnNamesData = array_keys($xmlItems[0]);
-        $data = [$columnNamesData];
+        $columnNames = array_keys($xmlItems[0]);
+        $data = [$columnNames];
 
         foreach ($xmlItems as $xmlItem) {
             $data[] = $this->parseItemValues($xmlItem);
@@ -35,20 +45,20 @@ class XmlParseService
     }
 
     /**
-     * @param mixed $item
+     * @param array $item
      * @return array
      */
-    public function parseItemValues(array $item): array
+    private function parseItemValues(array $item): array
     {
         $itemValues = array_values($item);
         return $this->changeImproperItemValues($itemValues);
     }
 
     /**
-     * @param mixed $itemValues
+     * @param array $itemValues
      * @return array
      */
-    public function changeImproperItemValues(array $itemValues): array
+    private function changeImproperItemValues(array $itemValues): array
     {
         foreach ($itemValues as &$itemValue) {
             if (is_array($itemValue)) {
