@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Classes\SpreadsheetDataExportResult;
+use App\Classes\SpreadsheetDataExportSettings;
+use App\Services\Interfaces\SpreadsheetDataExportService;
 use Exception;
 use Google\Client;
 use Google\Service\Drive;
@@ -9,7 +12,7 @@ use Google\Service\Sheets;
 use Google\Service\Sheets\Spreadsheet;
 use Google\Service\Sheets\ValueRange;
 
-class GoogleSpreadSheetApiClientService
+class GoogleSpreadsheetDataExportService implements SpreadsheetDataExportService
 {
     const INPUT_OPTION_RAW = 'RAW';
     protected Sheets $service;
@@ -29,17 +32,25 @@ class GoogleSpreadSheetApiClientService
     }
 
     /**
+     * @throws \Google\Exception
+     */
+    public function exportData(array $data, SpreadsheetDataExportSettings $dataExportSettings): SpreadsheetDataExportResult
+    {
+        return $this->insertDataIntoASpreadsheet($data, $dataExportSettings->spreadsheetTitle, $dataExportSettings->existingSpreadsheetId);
+    }
+
+    /**
      * @param array $values
      * @param string $title
      * @param string|null $existingSpreadsheetId
-     * @return array|null
+     * @return SpreadsheetDataExportResult
      * @throws \Google\Exception
      */
-    public function insertDataIntoASpreadsheet(array $values, string $title, ?string $existingSpreadsheetId): ?array
+    private function insertDataIntoASpreadsheet(array $values, string $title, ?string $existingSpreadsheetId): SpreadsheetDataExportResult
     {
         $spreadsheetId = $existingSpreadsheetId ?: $this->createNewSpreadsheet($title)->spreadsheetId;
 
-        return [$spreadsheetId, $this->updateSpreadsheetValues($spreadsheetId, $values, $title, self::INPUT_OPTION_RAW)];
+        return new SpreadsheetDataExportResult($spreadsheetId, $this->updateSpreadsheetValues($spreadsheetId, $values, $title, self::INPUT_OPTION_RAW));
     }
 
     /**

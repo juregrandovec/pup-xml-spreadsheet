@@ -2,7 +2,6 @@
 services:
   _defaults:
     autoconfigure: true
-    autowire: true
     public: true
 
   _instanceof:
@@ -25,7 +24,10 @@ services:
       $ftpUsername: '%env(string:XML_FTP_USERNAME)%'
       $ftpPassword: '%env(string:XML_FTP_PASSWORD)%'
 
-  App\Services\GoogleSpreadSheetApiClientService:
+  App\Services\GoogleSpreadsheetDataExportService:
     autowire: true
     arguments:
       $googleCredentialsFilePath: "%env(GOOGLE_CREDENTIALS_PATH)%"
+
+  App\Commands\ProcessXmlFileCommand:
+    autowire: true

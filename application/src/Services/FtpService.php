@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Services\Interfaces\FileDownloadService;
 use Exception;
 use FTP\Connection;
 
-class FtpService
+class FtpService implements FileDownloadService
 {
     public function __construct(private $ftpDomain, private $ftpUsername, private $ftpPassword)
     {
@@ -16,7 +17,7 @@ class FtpService
      *
      * @throws Exception
      */
-    public function getFileFromFtp(string $localFileName, string $serverFileName): string
+    public function downloadFileAsTmp(string $tmpFileName, string $serverFileName): string
     {
         $ftpConnection = ftp_connect($this->ftpDomain);
 
@@ -26,7 +27,7 @@ class FtpService
 
             if ($login_result) {
 
-                return $this->downloadTmpFileFromFtpConnection($ftpConnection, $localFileName, $serverFileName);
+                return $this->downloadTmpFileFromFtpConnection($ftpConnection, $tmpFileName, $serverFileName);
             } else {
                 ftp_close($ftpConnection);
                 throw new Exception("FTP login failed!");
@@ -37,16 +38,16 @@ class FtpService
 
     /**
      * @param Connection $ftpConnection
-     * @param string $localFileName
+     * @param string $tmpFileName
      * @param string $serverFileName
      * @return string
      * @throws Exception
      */
-    private function downloadTmpFileFromFtpConnection(Connection $ftpConnection, string $localFileName, string $serverFileName): string
+    private function downloadTmpFileFromFtpConnection(Connection $ftpConnection, string $tmpFileName, string $serverFileName): string
     {
-        if (ftp_get($ftpConnection, $localFileName, $serverFileName,)) {
+        if (ftp_get($ftpConnection, $tmpFileName, $serverFileName,)) {
 
-            return $localFileName;
+            return $tmpFileName;
         } else {
             ftp_close($ftpConnection);
             throw new Exception("FTP GET failed!");

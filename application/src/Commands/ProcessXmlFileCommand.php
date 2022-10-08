@@ -2,18 +2,18 @@
 
 namespace App\Commands;
 
-use App\Services\FtpService;
-use App\Services\GoogleSpreadSheetApiClientService;
-use App\Services\LoggerService;
-use App\Services\XmlParseService;
+use App\Classes\SpreadsheetDataExportSettings;
+use App\Classes\XmlFileDataParseSettings;
+use App\Services\Interfaces\XmlFileDataParseService;
+use App\Services\Interfaces\ErrorLoggerService;
+use App\Services\Interfaces\FileDownloadService;
+use App\Services\Interfaces\SpreadsheetDataExportService;
 use Exception;
-use Psr\Log\LogLevel;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
-use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -57,11 +57,12 @@ class ProcessXmlFileCommand extends Command
     private string $tmpFileName;
 
     public function __construct(
-        private FtpService                        $ftpService,
-        private GoogleSpreadSheetApiClientService $googleSpreadSheetApiClientService,
-        private XmlParseService                   $xmlParseService,
-        private LoggerService                     $loggerService,
-        string                                    $name = null)
+        private FileDownloadService          $fileDownloadService,
+        private SpreadsheetDataExportService $spreadsheetDataExportService,
+        private XmlFileDataParseService      $dataParseService,
+        private ErrorLoggerService           $loggerService,
+        string                               $name = null
+    )
     {
         $this->fileSystem = new Filesystem();
         parent::__construct($name);
@@ -83,7 +84,7 @@ class ProcessXmlFileCommand extends Command
      * @return string
      * @throws Exception
      */
-    private function getFilename(InputInterface $input): string
+    private function getFile(InputInterface $input): string
     {
         match ($input->getArgument(self::ARGUMENT_FILE_LOCATION)) {
             self::FILE_LOCATION_OPTION_FTP => $fileName = $this->tmpFileName = $this->getTmpFileFromFtp($this->xmlFileName),
@@ -130,15 +131,17 @@ class ProcessXmlFileCommand extends Command
             $this->collectInputs($input);
 
             $consoleLogger->info("starting XML parsing");
-            $fileName = $this->getFilename($input);
+            $fileName = $this->getFile($input);
 
             $consoleLogger->info(sprintf("parsing data from xml file: %s", $fileName));
-            $values = $this->xmlParseService->getParsedDataFromXmlFile($fileName, $this->xmlParentElementName);
+            $xmlFileDataParseSettings = new XmlFileDataParseSettings($fileName, $this->xmlParentElementName);
+            $values = $this->dataParseService->parseDataFromFile($xmlFileDataParseSettings);
 
-            $consoleLogger->info("inserting data into a new google spreadsheet");
-            list ($spreadsheetId, $insertedCells) = $this->googleSpreadSheetApiClientService->insertDataIntoASpreadsheet($values, $this->spreadsheetTitle, $this->spreadsheetId);
+            $consoleLogger->info("inserting data into google spreadsheet");
+            $spreadsheetDataExportSettings = new SpreadsheetDataExportSettings($this->spreadsheetTitle, $this->spreadsheetId);
+            $result = $this->spreadsheetDataExportService->exportData($values, $spreadsheetDataExportSettings);
 
-            $consoleLogger->info(sprintf("inserted %d cells into spreadsheet with ID: %s", $insertedCells, $spreadsheetId));
+            $consoleLogger->info(sprintf("inserted %d cells into spreadsheet with ID: %s", $result->exportedCells, $result->spreadsheetId));
 
             return Command::SUCCESS;
 
@@ -165,7 +168,7 @@ class ProcessXmlFileCommand extends Command
     private function getTmpFileFromFtp(string $fileName): string
     {
         $tmpXmlFileName = $this->getTmpXmlFileName();
-        return $this->ftpService->getFileFromFtp($tmpXmlFileName, $fileName);
+        return $this->fileDownloadService->downloadFileAsTmp($tmpXmlFileName, $fileName);
     }
 
     /**

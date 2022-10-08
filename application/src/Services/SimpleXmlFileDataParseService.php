@@ -2,17 +2,30 @@
 
 namespace App\Services;
 
+use App\Classes\XmlFileDataParseSettings;
+use App\Services\Interfaces\XmlFileDataParseService;
 use Exception;
 
-class XmlParseService
+class SimpleXmlFileDataParseService implements XmlFileDataParseService
 {
+
+    /**
+     * @param XmlFileDataParseSettings $xmlFileDataParseSettings
+     * @return array
+     * @throws Exception
+     */
+    public function parseDataFromFile(XmlFileDataParseSettings $xmlFileDataParseSettings): array
+    {
+        return $this->getParsedDataFromXmlFile($xmlFileDataParseSettings->filename, $xmlFileDataParseSettings->xmlParentElementName);
+    }
+
     /**
      * @param string $fileName
      * @param $xmlParentElementName
      * @return array|null
      * @throws Exception
      */
-    public function getParsedDataFromXmlFile(string $fileName, $xmlParentElementName): ?array
+    private function getParsedDataFromXmlFile(string $fileName, $xmlParentElementName): ?array
     {
         $xml = simplexml_load_file($fileName, options: LIBXML_NOCDATA);
         if (!$xml) {
