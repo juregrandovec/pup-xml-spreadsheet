@@ -68,45 +68,6 @@ class ProcessXmlFileCommand extends Command
         parent::__construct($name);
     }
 
-    /**
-     * @param ConsoleLogger $consoleLogger
-     * @param Exception $e
-     * @return void
-     */
-    private function logError(ConsoleLogger $consoleLogger, Exception $e): void
-    {
-        $consoleLogger->error(sprintf("Error %s", $e->getMessage()), [$e]);
-        $this->loggerService->error($e->getMessage());
-    }
-
-    /**
-     * @param InputInterface $input
-     * @return string
-     * @throws Exception
-     */
-    private function getFile(InputInterface $input): string
-    {
-        match ($input->getArgument(self::ARGUMENT_FILE_LOCATION)) {
-            self::FILE_LOCATION_OPTION_FTP => $fileName = $this->tmpFileName = $this->getTmpFileFromFtp($this->xmlFileName),
-            self::FILE_LOCATION_OPTION_LOCAL => $fileName = $this->getStorageFileName($this->localFileFolder, $this->xmlFileName),
-            default => throw new Exception("File location argument not valid ")
-        };
-        return $fileName;
-    }
-
-    /**
-     * @param InputInterface $input
-     * @return void
-     */
-    private function collectInputs(InputInterface $input): void
-    {
-        $this->xmlFileName = $input->getOption(self::ARGUMENT_XML_FILE_NAME);
-        $this->localFileFolder = $input->getOption(self::ARGUMENT_LOCAL_FILE_FOLDER);
-        $this->xmlParentElementName = $input->getOption(self::ARGUMENT_XML_PARENT_ELEMENT_NAME);
-        $this->spreadsheetId = $input->getOption(self::ARGUMENT_SHEET_ID);
-        $this->spreadsheetTitle = $input->getOption(self::ARGUMENT_SHEET_TITLE);
-    }
-
     protected function configure()
     {
         $this->addArgument(self::ARGUMENT_FILE_LOCATION, InputArgument::OPTIONAL, sprintf('[%s] The location of the XML file we want to parse.', implode(" | ", self::FILE_LOCATION_OPTIONS)), self::FILE_LOCATION_OPTION_LOCAL)
@@ -155,6 +116,19 @@ class ProcessXmlFileCommand extends Command
     }
 
     /**
+     * @param InputInterface $input
+     * @return void
+     */
+    private function collectInputs(InputInterface $input): void
+    {
+        $this->xmlFileName = $input->getOption(self::ARGUMENT_XML_FILE_NAME);
+        $this->localFileFolder = $input->getOption(self::ARGUMENT_LOCAL_FILE_FOLDER);
+        $this->xmlParentElementName = $input->getOption(self::ARGUMENT_XML_PARENT_ELEMENT_NAME);
+        $this->spreadsheetId = $input->getOption(self::ARGUMENT_SHEET_ID);
+        $this->spreadsheetTitle = $input->getOption(self::ARGUMENT_SHEET_TITLE);
+    }
+
+    /**
      * @return string
      */
     private function getTmpXmlFileName(): string
@@ -187,10 +161,39 @@ class ProcessXmlFileCommand extends Command
         return $filePath;
     }
 
-    private function unlinkTmpFile()
+    /**
+     * @return void
+     */
+    private function unlinkTmpFile(): void
     {
         if (isset($this->tmpFileName) && file_exists($this->tmpFileName)) {
             unlink($this->tmpFileName);
         }
+    }
+
+    /**
+     * @param ConsoleLogger $consoleLogger
+     * @param Exception $e
+     * @return void
+     */
+    private function logError(ConsoleLogger $consoleLogger, Exception $e): void
+    {
+        $consoleLogger->error(sprintf("Error %s", $e->getMessage()), [$e]);
+        $this->loggerService->error($e->getMessage());
+    }
+
+    /**
+     * @param InputInterface $input
+     * @return string
+     * @throws Exception
+     */
+    private function getFile(InputInterface $input): string
+    {
+        match ($input->getArgument(self::ARGUMENT_FILE_LOCATION)) {
+            self::FILE_LOCATION_OPTION_FTP => $fileName = $this->tmpFileName = $this->getTmpFileFromFtp($this->xmlFileName),
+            self::FILE_LOCATION_OPTION_LOCAL => $fileName = $this->getStorageFileName($this->localFileFolder, $this->xmlFileName),
+            default => throw new Exception("File location argument not valid ")
+        };
+        return $fileName;
     }
 }
