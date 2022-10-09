@@ -35,12 +35,12 @@ class ProcessXmlFileCommandTest extends TestCase
     private function createProcessXmlFileCommand(): ProcessXmlFileCommand
     {
         $ftpService = new FtpService($_ENV['XML_FPT_DOMAIN'], $_ENV['XML_FTP_USERNAME'], $_ENV['XML_FTP_PASSWORD']);
-        $googleSpreadsheetDataExportservice = new GoogleSpreadsheetDataExportService($_ENV['GOOGLE_CREDENTIALS_PATH']);
+        $googleSpreadsheetDataExportService = new GoogleSpreadsheetDataExportService($_ENV['GOOGLE_CREDENTIALS_PATH']);
         $simpleXmlFileDataParseService = new SimpleXmlFileDataParseService();
         $fileErrorLoggerService = new FileErrorLoggerService();
 
         $application = new Application();
-        $command = new ProcessXmlFileCommand($ftpService, $googleSpreadsheetDataExportservice, $simpleXmlFileDataParseService, $fileErrorLoggerService);
+        $command = new ProcessXmlFileCommand($ftpService, $googleSpreadsheetDataExportService, $simpleXmlFileDataParseService, $fileErrorLoggerService);
         $command->setApplication($application);
         return $command;
     }

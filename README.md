@@ -21,15 +21,15 @@ This project uses requires:
 ## Usage
 #### This application has to be used within the docker container, so please use the `docker exec` command.
 
-Use 
-`php bin/console xml -h` to display all the options and arguments of the application
+Use `php bin/console xml -h` to display all the options and arguments of the application
 * Parse Local XML file:
-  * `php bin/console xml` for default usage
-  * `php bin/console xml storage "./storage/coffee_feed.xml" item` for configurable usage
+  * `php bin/console xml local` for usage with default options
   
 * Parse XML file from FTP server:
-  * `php bin/console xml ftp` for default usage
-  * `php bin/console xml ftp "./storage/coffee_feed.xml" item` for configurable usage
+  * `php bin/console xml ftp` for usage with default options
 
 
+## Tests
+This application uses PHPUnit testing tool. Tests are located in src/Tests.
 
+Use `./vendor/bin/phpunit src/Tests` from `/var/www` folder in the container to run the tests
