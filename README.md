@@ -32,4 +32,6 @@ Use `php bin/console xml -h` to display all the options and arguments of the app
 ## Tests
 This application uses PHPUnit testing tool. Tests are located in src/Tests.
 
+Fill the `.env.testing` file with credentials before running tests.
+
 Use `./vendor/bin/phpunit src/Tests` from `/var/www` folder in the container to run the tests
